@@ -5,8 +5,9 @@ pygame.init()
 pygame.key.set_repeat(200, 70)
 
 clock = pygame.time.Clock()
-screen_size = (1922 // 1.5, 1082 // 1.5)
-FPS = 10
+#screen_size = (1922 // 1.5, 1082 // 1.5)
+screen_size = (1024, 850)
+#FPS = 27
 screenWidth = int(screen_size[0])
 screenHeight = int(screen_size[1])
 screen_size = (screenWidth, screenHeight)
@@ -32,33 +33,38 @@ def load_image(name, path, color_key=None):
     return image
 
 
-
-
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites)
         self.is_loaded = False
-        self.frames = []
+        self.LFrames = []
+        self.RFrames = []
         self.cur_frame = 0
         self.image = None
         self.rect = None
         self.x = x
         self.y = y
-        self.speed = 10
+        self.speed = 15
         self.left = False
-        self.right = False
+        self.right = True
         self.standing = True
         self.run = False
-        if self.is_loaded:
-            self.image = self.frames[self.cur_frame]
-            self.rect = self.rect.move(x, y)
+        self.walkCount = 0
+
 
     def load_images(self, name, path, type, count):
         for i in range(0, count):
-            img_temp = load_image(name + str(i) + type, path)
+            n = ''
+            if i <=9:
+                n += '0' + str(i)
+            else:
+                n += str(i)
+            img_temp = load_image(name + n + type, path)
             size = img_temp.get_rect()
-            img_temp = pygame.transform.scale(img_temp, (size.width//10, size.height//10))
-            self.frames.append(img_temp)
+            img_temp = pygame.transform.scale(img_temp, (size.width//7, size.height//7))
+            self.RFrames.append(img_temp)
+            flipped_surface = pygame.transform.flip(img_temp, True, False)
+            self.LFrames.append(flipped_surface)
             self.rect = img_temp.get_rect()
         self.is_loaded = True
         self.rect = self.rect.move(self.x, self.y)
@@ -78,49 +84,65 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.update()
 
     def update(self):
-        if self.run:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
+        if self.walkCount + 1 >= 24:
+            self.walkCount = 0
+        if not self.standing:
+            if self.left:
+                #win.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
+                self.image = self.LFrames[self.walkCount // 2]
+                self.walkCount += 1
+            elif self.right:
+                self.image = self.RFrames[self.walkCount // 2]
+                self.walkCount += 1
         else:
-            self.cur_frame = 0
-            self.image = load_image('_WALK_005.png','images//1_KNIGHT//_WALK')
-            size = self.image.get_rect()
-            self.image = pygame.transform.scale(self.image, (size.width // 10, size.height // 10))
+            if self.right:
+                self.image = load_image('0_Golem_Idle_000.png', 'images//PNG Sequences//Idle')
+                size = self.image.get_rect()
+                self.image = pygame.transform.scale(self.image, (size.width // 7, size.height // 7))
+            else:
+                self.image = load_image('0_Golem_Idle_000.png', 'images//PNG Sequences//Idle')
+                size = self.image.get_rect()
+                self.image = pygame.transform.scale(self.image, (size.width // 7, size.height // 7))
+                self.image = pygame.transform.flip(self.image, True, False)
 
 
 
 
 
 run = True
-man = AnimatedSprite(200, 470)
-man.load_images('_RUN_00', 'images//1_KNIGHT//_RUN', '.png', 7)
+man = AnimatedSprite(200, 530)
+man.load_images('0_Golem_Running_0', 'images//PNG Sequences//Running', '.png', 12)
 print(man.image)
 print(man.is_loaded)
 print(man.rect)
 while run:
-
-    #pygame.time.Clock().tick(27)
+    pygame.time.Clock().tick(27)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-        if event.type == pygame.QUIT:
-            running = False
         elif event.type == pygame.KEYDOWN:
-            man.run = True
+            man.standing = False
             if event.key == pygame.K_LEFT:
+                if man.right is True:
+                    man.rect.left += man.rect.width//14
+                    man.right = False
+                    man.left = True
                 man.rect.left -= man.speed
             if event.key == pygame.K_RIGHT:
+                if man.left is True:
+                    man.rect.left -= man.rect.width//14
+                    man.right = True
+                    man.left = False
                 man.rect.left += man.speed
-
         else:
-            man.run = False
+            man.standing = True
     # bg = pygame.image.load('images/BG4.png')
-    bg = load_image('BG4.png', 'images')
+    bg = load_image('forest.png', 'images')
     bg = pygame.transform.scale(bg, (screenWidth, screenHeight))
     win.blit(bg, (0, 0))
     all_sprites.draw(win)
     all_sprites.update()
     pygame.display.flip()
-    clock.tick(FPS)
+    #clock.tick(FPS)
 
 pygame.quit()
