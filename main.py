@@ -6,7 +6,7 @@ pygame.init()
 
 clock = pygame.time.Clock()
 # screen_size = (1922 // 1.5, 1082 // 1.5)
-screen_size = (1024, 762)
+screen_size = (1024, 850)
 FPS = 40
 screenWidth = int(screen_size[0])
 screenHeight = int(screen_size[1])
@@ -201,6 +201,8 @@ man2.load_images('0_Golem_Slashing_0', 'images//PNG Sequences_golem3//Slashing_'
 print(man1.image)
 print(man1.is_loaded)
 print(man1.rect)
+bg = load_image('forest.png', 'images')
+win.blit(bg, (0, 0))
 while run:
     pygame.time.Clock().tick(FPS)
     for event in pygame.event.get():
@@ -254,13 +256,13 @@ while run:
     # bg = load_image('bg.jpg', 'images')
     # bg = pygame.transform.scale(bg, (screenWidth, screenHeight))
     # win.blit(bg, (0, 0))
-    bg = pygame.Surface(screen_size)
-    bg.fill(pygame.Color('white'))
-    draw_background(bg)
-    win.blit(bg, (0, 0))
+    #bg = pygame.Surface(screen_size)
+    #bg.fill(pygame.Color('white'))
+    #draw_background(bg)
+
     player_group.draw(win)
     player_group.update()
     pygame.display.flip()
     # clock.tick(FPS)
-
+    player_group.clear(win,bg)
 pygame.quit()
