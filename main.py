@@ -2,12 +2,12 @@ import pygame
 import os
 
 pygame.init()
-pygame.key.set_repeat(200, 70)
+#pygame.key.set_repeat(200, 70)
 
 clock = pygame.time.Clock()
 #screen_size = (1922 // 1.5, 1082 // 1.5)
-screen_size = (1024, 850)
-#FPS = 27
+screen_size = (1024, 762)
+FPS = 40
 screenWidth = int(screen_size[0])
 screenHeight = int(screen_size[1])
 screen_size = (screenWidth, screenHeight)
@@ -32,7 +32,7 @@ def load_image(name, path, color_key=None):
         image.set_colorkey(color_key)
     return image
 
-
+'''
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites)
@@ -44,7 +44,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect = None
         self.x = x
         self.y = y
-        self.speed = 15
+        self.speed = 11
         self.left = False
         self.right = True
         self.standing = True
@@ -61,7 +61,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 n += str(i)
             img_temp = load_image(name + n + type, path)
             size = img_temp.get_rect()
-            img_temp = pygame.transform.scale(img_temp, (size.width//7, size.height//7))
+            img_temp = pygame.transform.scale(img_temp, (size.width, size.height))
             self.RFrames.append(img_temp)
             flipped_surface = pygame.transform.flip(img_temp, True, False)
             self.LFrames.append(flipped_surface)
@@ -79,20 +79,90 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
+        self.rect = self.rect.move(self.x, self.y)
+        self.update()
+
+    def update(self):
+        if self.walkCount + 1 >= 12*1:
+            self.walkCount = 0
+        if not self.standing:
+            if self.left:
+                #win.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
+                self.image = self.LFrames[self.walkCount // 1]
+                self.walkCount += 1
+            elif self.right:
+                self.image = self.RFrames[self.walkCount // 1]
+                self.walkCount += 1
+        else:
+            if self.right:
+                self.image = load_image('0_Golem_Idle_000.png', 'images//PNG Sequences//Idle')
+                size = self.image.get_rect()
+                self.image = pygame.transform.scale(self.image, (size.width // 7, size.height // 7))
+            else:
+                self.image = load_image('0_Golem_Idle_000.png', 'images//PNG Sequences//Idle')
+                size = self.image.get_rect()
+                self.image = pygame.transform.scale(self.image, (size.width // 7, size.height // 7))
+                self.image = pygame.transform.flip(self.image, True, False)
+'''
+def draw_background(surface):
+    pygame.draw.rect(surface, pygame.Color('green'), (0, 762 // 2, 1024, 762 // 2))
+    pygame.draw.rect(surface, pygame.Color(82, 239, 246, 255), (0, 0, 1024, 762 // 2))
+    pygame.draw.rect(surface, pygame.Color(115, 74, 1, 255), (80, 752 // 2 - 200, 40, 230))
+    pygame.draw.circle(surface, pygame.Color(2, 132, 32, 255), (100, 752 // 2 - 200), 90)
+
+
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(player_group)
+        self.is_loaded = False
+        #left(right) run
+        self.LRFrames = []
+        self.RRFrames = []
+        #left (right) attack
+        self.LSFrames =[]
+        self.RSFrames =[]
+        self.cur_frame = 0
+        self.image = None
+        self.rect = None
+        self.x = x
+        self.y = y
+        self.speed = 10
+        self.left = False
+        self.right = True
+        self.standing = True
+        self.run = False
+        self.walkCount = 0
+
+    def load_images(self, name, path, type, count):
+        for i in range(0, count):
+            n = ''
+            if i <= 9:
+                n += '0' + str(i)
+            else:
+                n += str(i)
+            img_temp = load_image(name + n + type, path)
+            size = img_temp.get_rect()
+            img_temp = pygame.transform.scale(img_temp, (size.width, size.height))
+            self.RRFrames.append(img_temp)
+            flipped_surface = pygame.transform.flip(img_temp, True, False)
+            self.LRFrames.append(flipped_surface)
+            self.rect = img_temp.get_rect()
         self.is_loaded = True
         self.rect = self.rect.move(self.x, self.y)
         self.update()
 
     def update(self):
-        if self.walkCount + 1 >= 24:
+        if self.walkCount + 1 >= 12 * 1:
             self.walkCount = 0
         if not self.standing:
             if self.left:
-                #win.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
-                self.image = self.LFrames[self.walkCount // 2]
+                # win.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
+                self.image = self.LRFrames[self.walkCount // 1]
                 self.walkCount += 1
             elif self.right:
-                self.image = self.RFrames[self.walkCount // 2]
+                self.image = self.RRFrames[self.walkCount // 1]
                 self.walkCount += 1
         else:
             if self.right:
@@ -107,41 +177,45 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 
-
-
 run = True
-man = AnimatedSprite(200, 530)
-man.load_images('0_Golem_Running_0', 'images//PNG Sequences//Running', '.png', 12)
+man = Player(200, 530)
+man.load_images('0_Golem_Running_0', 'images//PNG Sequences//Running_', '.png', 12)
 print(man.image)
 print(man.is_loaded)
 print(man.rect)
 while run:
-    pygame.time.Clock().tick(27)
+    pygame.time.Clock().tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-        elif event.type == pygame.KEYDOWN:
-            man.standing = False
-            if event.key == pygame.K_LEFT:
-                if man.right is True:
-                    man.rect.left += man.rect.width//14
-                    man.right = False
-                    man.left = True
-                man.rect.left -= man.speed
-            if event.key == pygame.K_RIGHT:
-                if man.left is True:
-                    man.rect.left -= man.rect.width//14
-                    man.right = True
-                    man.left = False
-                man.rect.left += man.speed
-        else:
-            man.standing = True
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        man.standing = False
+        if man.right is True:
+            man.rect.left += man.rect.width//14
+            man.right = False
+            man.left = True
+        man.rect.left -= man.speed
+    elif keys[pygame.K_RIGHT]:
+        man.standing = False
+        if man.left is True:
+            man.rect.left -= man.rect.width//14
+            man.right = True
+            man.left = False
+        man.rect.left += man.speed
+    else:
+        man.standing = True
+        man.walkCount = 0
     # bg = pygame.image.load('images/BG4.png')
-    bg = load_image('forest.png', 'images')
-    bg = pygame.transform.scale(bg, (screenWidth, screenHeight))
+    #bg = load_image('bg.jpg', 'images')
+    #bg = pygame.transform.scale(bg, (screenWidth, screenHeight))
+    #win.blit(bg, (0, 0))
+    bg = pygame.Surface(screen_size)
+    bg.fill(pygame.Color('white'))
+    draw_background(bg)
     win.blit(bg, (0, 0))
-    all_sprites.draw(win)
-    all_sprites.update()
+    player_group.draw(win)
+    player_group.update()
     pygame.display.flip()
     #clock.tick(FPS)
 
