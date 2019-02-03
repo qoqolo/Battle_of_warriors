@@ -3,6 +3,14 @@ import os
 
 pygame.init()
 # pygame.key.set_repeat(200, 70)
+JOY = True
+joystick = None
+if JOY:
+    pygame.joystick.init()
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+
+
 
 clock = pygame.time.Clock()
 # screen_size = (1922 // 1.5, 1082 // 1.5)
@@ -209,46 +217,100 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         #print(event)
+    mouse = pygame.mouse.get_pressed()
+    #print(mouse)
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_a]:
-        man1.standing = False
-        if man1.right is True:
-            man1.rect.left += man1.rect.width // 14
-            man1.right = False
-            man1.left = True
-        man1.rect.left -= man1.speed
-    elif keys[pygame.K_d]:
-        man1.standing = False
-        if man1.left is True:
-            man1.rect.left -= man1.rect.width // 14
-            man1.right = True
-            man1.left = False
-        man1.rect.left += man1.speed
-    else:
-        man1.standing = True
-        man1.walkCount = 0
-    if keys[pygame.K_SPACE]:
-        man1.attacking = True
+    hat = [None]
+    BTN_B = False
+    BTN_X = False
+    BTN_Y = False
+    BTN_A = False
+    if JOY:
+        hat = joystick.get_hat(0)
+        # buttons = joystick.get_numbuttons()
+        BTN_B = joystick.get_button(1)
+        BTN_X = joystick.get_button(2)
+        BTN_Y = joystick.get_button(3)
+        BTN_A = joystick.get_button(0)
+        if hat[0] == -1:
+            man1.standing = False
+            if man1.right is True:
+                man1.rect.left += man1.rect.width // 14
+                man1.right = False
+                man1.left = True
+            man1.rect.left -= man1.speed
+        elif hat[0] == 1:
+            man1.standing = False
+            if man1.left is True:
+                man1.rect.left -= man1.rect.width // 14
+                man1.right = True
+                man1.left = False
+            man1.rect.left += man1.speed
+        else:
+            man1.standing = True
+            man1.walkCount = 0
+        if BTN_X:
+            man1.attacking = True
 
-    if keys[pygame.K_LEFT]:
-        man2.standing = False
-        if man2.right is True:
-            man2.rect.left += man2.rect.width // 14
-            man2.right = False
-            man2.left = True
-        man2.rect.left -= man2.speed
-    elif keys[pygame.K_RIGHT]:
-        man2.standing = False
-        if man2.left is True:
-            man2.rect.left -= man2.rect.width // 14
-            man2.right = True
-            man2.left = False
-        man2.rect.left += man2.speed
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            man2.standing = False
+            if man2.right is True:
+                man2.rect.left += man2.rect.width // 14
+                man2.right = False
+                man2.left = True
+            man2.rect.left -= man2.speed
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            man2.standing = False
+            if man2.left is True:
+                man2.rect.left -= man2.rect.width // 14
+                man2.right = True
+                man2.left = False
+            man2.rect.left += man2.speed
+        else:
+            man2.standing = True
+            man2.walkCount = 0
+        if keys[pygame.K_RETURN] or mouse[0] == 1 or keys[pygame.K_SPACE]:
+            man2.attacking = True
     else:
-        man2.standing = True
-        man2.walkCount = 0
-    if keys[pygame.K_RETURN]:
-        man2.attacking = True
+        if keys[pygame.K_a] :
+            man1.standing = False
+            if man1.right is True:
+                man1.rect.left += man1.rect.width // 14
+                man1.right = False
+                man1.left = True
+            man1.rect.left -= man1.speed
+        elif keys[pygame.K_d] :
+            man1.standing = False
+            if man1.left is True:
+                man1.rect.left -= man1.rect.width // 14
+                man1.right = True
+                man1.left = False
+            man1.rect.left += man1.speed
+        else:
+            man1.standing = True
+            man1.walkCount = 0
+        if keys[pygame.K_SPACE] :
+            man1.attacking = True
+
+        if keys[pygame.K_LEFT]:
+            man2.standing = False
+            if man2.right is True:
+                man2.rect.left += man2.rect.width // 14
+                man2.right = False
+                man2.left = True
+            man2.rect.left -= man2.speed
+        elif keys[pygame.K_RIGHT]:
+            man2.standing = False
+            if man2.left is True:
+                man2.rect.left -= man2.rect.width // 14
+                man2.right = True
+                man2.left = False
+            man2.rect.left += man2.speed
+        else:
+            man2.standing = True
+            man2.walkCount = 0
+        if keys[pygame.K_RETURN] or mouse[0] == 1:
+            man2.attacking = True
 
 
 
@@ -266,3 +328,16 @@ while run:
     # clock.tick(FPS)
     player_group.clear(win,bg)
 pygame.quit()
+
+'''
+    if man.isJump:
+        if man.jumpCount >= -1 * man.jumpCountStart:
+            neg = 1
+            if man.jumpCount < 0 :
+                neg = -1
+            man.y -= (man.jumpCount ** 2) // 2 * neg
+            man.jumpCount -= 1
+        else:
+            man.isJump = False
+            man.jumpCount = man.jumpCountStart
+'''
