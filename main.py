@@ -3,7 +3,7 @@ import os
 
 pygame.init()
 # pygame.key.set_repeat(200, 70)
-JOY = True
+JOY = False
 joystick = None
 if JOY:
     pygame.joystick.init()
@@ -14,8 +14,8 @@ if JOY:
 
 clock = pygame.time.Clock()
 # screen_size = (1922 // 1.5, 1082 // 1.5)
-screen_size = (1024, 850)
-FPS = 40
+screen_size = (1600, 900)
+FPS = 60
 screenWidth = int(screen_size[0])
 screenHeight = int(screen_size[1])
 screen_size = (screenWidth, screenHeight)
@@ -138,7 +138,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = None
         self.x = x
         self.y = y
-        self.speed = 10
+        self.speed = 12
         self.left = False
         self.right = True
         self.standing = True
@@ -148,6 +148,9 @@ class Player(pygame.sprite.Sprite):
         self.attacking = False
         self.idleImageLeft =idleImageLeft
         self.idleImageRight = idleImageRight
+        self.isJump = False
+        self.jumpCountStart = 9
+        self.jumpCount = 9
     def load_images(self, name, path, type, count, whereL, whereR):
         for i in range(0, count):
             n = ''
@@ -198,18 +201,18 @@ class Player(pygame.sprite.Sprite):
 run = True
 idleLeft = load_image('0_Golem_Idle_000.png','images//PNG Sequences_golem1//Idle_//')
 idleRight = pygame.transform.flip(idleLeft, True, False)
-man1 = Player(200, 530,idleLeft,idleRight)
+man1 = Player(200, 610,idleLeft,idleRight)
 man1.load_images('0_Golem_Running_0', 'images//PNG Sequences_golem1//Running_', '.png', 12, man1.RRFrames, man1.LRFrames)
 man1.load_images('0_Golem_Slashing_0', 'images//PNG Sequences_golem1//Slashing_', '.png', 12, man1.RSFrames, man1.LSFrames)
 idleLeft = load_image('0_Golem_Idle_000.png','images//PNG Sequences_golem3//Idle_//')
 idleRight = pygame.transform.flip(idleLeft, True, False)
-man2 = Player(600, 530,idleLeft,idleRight)
+man2 = Player(600, 610,idleLeft,idleRight)
 man2.load_images('0_Golem_Running_0', 'images//PNG Sequences_golem3//Running_', '.png', 12, man2.RRFrames, man2.LRFrames)
 man2.load_images('0_Golem_Slashing_0', 'images//PNG Sequences_golem3//Slashing_', '.png', 12, man2.RSFrames, man2.LSFrames)
 print(man1.image)
 print(man1.is_loaded)
 print(man1.rect)
-bg = load_image('forest.png', 'images')
+bg = load_image('1600x900_backg.jpg', 'images')
 win.blit(bg, (0, 0))
 while run:
     pygame.time.Clock().tick(FPS)
@@ -232,6 +235,7 @@ while run:
         BTN_X = joystick.get_button(2)
         BTN_Y = joystick.get_button(3)
         BTN_A = joystick.get_button(0)
+        #hero 1
         if hat[0] == -1:
             man1.standing = False
             if man1.right is True:
@@ -252,6 +256,23 @@ while run:
         if BTN_X:
             man1.attacking = True
 
+        if not man1.isJump:
+            if BTN_Y:
+                man1.isJump = True
+                #print('yes')
+                man1.walkCount = 0
+        if man1.isJump:
+            if man1.jumpCount >= -1 * man1.jumpCountStart:
+                neg = 1
+                if man1.jumpCount < 0:
+                    neg = -1
+                man1.rect.top -= (man1.jumpCount ** 2) // 2 * neg
+                man1.jumpCount -= 1
+            else:
+                man1.isJump = False
+                man1.jumpCount = man1.jumpCountStart
+
+        #hero 2
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             man2.standing = False
             if man2.right is True:
@@ -269,9 +290,26 @@ while run:
         else:
             man2.standing = True
             man2.walkCount = 0
-        if keys[pygame.K_RETURN] or mouse[0] == 1 or keys[pygame.K_SPACE]:
+        if keys[pygame.K_RETURN] or mouse[0] == 1:
             man2.attacking = True
+
+        if not man2.isJump:
+            if keys[pygame.K_SPACE]:
+                man2.isJump = True
+                #print('yes')
+                man2.walkCount = 0
+        if man2.isJump:
+            if man2.jumpCount >= -1 * man2.jumpCountStart:
+                neg = 1
+                if man2.jumpCount < 0:
+                    neg = -1
+                man2.rect.top -= (man2.jumpCount ** 2) // 2 * neg
+                man2.jumpCount -= 1
+            else:
+                man2.isJump = False
+                man2.jumpCount = man2.jumpCountStart
     else:
+        #hero 1
         if keys[pygame.K_a] :
             man1.standing = False
             if man1.right is True:
@@ -292,6 +330,22 @@ while run:
         if keys[pygame.K_SPACE] :
             man1.attacking = True
 
+        if not man1.isJump:
+            if keys[pygame.K_LSHIFT]:
+                man1.isJump = True
+                print('yes')
+                man1.walkCount = 0
+        if man1.isJump:
+            if man1.jumpCount >= -1 * man1.jumpCountStart:
+                neg = 1
+                if man1.jumpCount < 0:
+                    neg = -1
+                man1.rect.top -= (man1.jumpCount ** 2) // 2 * neg
+                man1.jumpCount -= 1
+            else:
+                man1.isJump = False
+                man1.jumpCount = man1.jumpCountStart
+        #hero 2
         if keys[pygame.K_LEFT]:
             man2.standing = False
             if man2.right is True:
@@ -312,7 +366,21 @@ while run:
         if keys[pygame.K_RETURN] or mouse[0] == 1:
             man2.attacking = True
 
-
+        if not man2.isJump:
+            if keys[pygame.K_RSHIFT]:
+                man2.isJump = True
+                #print('yes')
+                man2.walkCount = 0
+        if man2.isJump:
+            if man2.jumpCount >= -1 * man2.jumpCountStart:
+                neg = 1
+                if man2.jumpCount < 0:
+                    neg = -1
+                man2.rect.top -= (man2.jumpCount ** 2) // 2 * neg
+                man2.jumpCount -= 1
+            else:
+                man2.isJump = False
+                man2.jumpCount = man2.jumpCountStart
 
     # bg = pygame.image.load('images/BG4.png')
     # bg = load_image('bg.jpg', 'images')
@@ -328,16 +396,3 @@ while run:
     # clock.tick(FPS)
     player_group.clear(win,bg)
 pygame.quit()
-
-'''
-    if man.isJump:
-        if man.jumpCount >= -1 * man.jumpCountStart:
-            neg = 1
-            if man.jumpCount < 0 :
-                neg = -1
-            man.y -= (man.jumpCount ** 2) // 2 * neg
-            man.jumpCount -= 1
-        else:
-            man.isJump = False
-            man.jumpCount = man.jumpCountStart
-'''
