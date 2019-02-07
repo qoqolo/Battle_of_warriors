@@ -153,7 +153,7 @@ class Player(pygame.sprite.Sprite):
         self.jumpCount = 9
         self.enemyLeft = False
         self.enemyRight = False
-
+        self.enemyBottom = False
 
 
     def load_images(self, name, path, type, count, whereL, whereR):
@@ -172,7 +172,6 @@ class Player(pygame.sprite.Sprite):
             self.rect = img_temp.get_rect()
         self.is_loaded = True
         self.rect = self.rect.move(self.x, self.y)
-
         self.update()
 
     def update(self):
@@ -223,12 +222,27 @@ win.blit(bg, (0, 0))
 while run:
     pygame.time.Clock().tick(FPS)
     if pygame.sprite.collide_mask(man1,man2):
-        if man1.rect.left > man2.rect.left:
+        print('now', man2.rect.midright[0] , man1.rect.midbottom[0] , man2.rect.midleft[0], man2.rect.midright[0] > man1.rect.midbottom[0] > man2.rect.midleft[0])
+        if ( man2.rect.midright[0] > man1.rect.midbottom[0] > man2.rect.midleft[0] ) and man1.rect.top > man2.rect.top:
+            man1.enemyBottom = True
+            man2.enemyBottom = False
+            man1.enemyLeft = False
+            man1.enemyRight = False
+            man2.enemyRight = False
+            man2.enemyLeft = False
+        elif ( man1.rect.midright[0] > man2.rect.midbottom[0] > man1.rect.midleft[0]) and man2.rect.top > man1.rect.top:
+            man2.enemyBottom = True
+            man1.enemyBottom = False
+            man1.enemyLeft = False
+            man1.enemyRight = False
+            man2.enemyRight = False
+            man2.enemyLeft = False
+        elif (man1.rect.left > man2.rect.left) and man1.rect.top == man2.rect.top:
             man1.enemyLeft = True
             man1.enemyRight = False
             man2.enemyRight = True
             man2.enemyLeft = False
-        else:
+        elif (man1.rect.left < man2.rect.left) and man1.rect.top == man2.rect.top:
             man1.enemyLeft = False
             man1.enemyRight = True
             man2.enemyRight = False
@@ -244,7 +258,8 @@ while run:
             run = False
         #print(event)
     mouse = pygame.mouse.get_pressed()
-    #print(mouse)
+    mouse_coord = pygame.mouse.get_pos()
+    #print(mouse_coord)
     keys = pygame.key.get_pressed()
     hat = [None]
     BTN_B = False
@@ -303,7 +318,7 @@ while run:
                 man2.right = False
                 man2.left = True
             man2.rect.left -= man2.speed
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and not man2.enemyRight:
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not man2.enemyRight:
             man2.standing = False
             if man2.left is True:
                 man2.rect.left -= man2.rect.width // 14
@@ -313,7 +328,16 @@ while run:
         else:
             man2.standing = True
             man2.walkCount = 0
-        if keys[pygame.K_RETURN] or mouse[0] == 1:
+        if keys[pygame.K_RETURN]:
+            man2.attacking = True
+        if mouse[0] == 1:
+            if man2.right and mouse_coord[0] < man2.rect.left:
+                man2.right = False
+                man2.left = True
+            elif man2.left and mouse_coord[0] > man2.rect.left:
+                man2.right = True
+                man2.left = False
+            #print('left',man2.left,'right',man2.right,'/n')
             man2.attacking = True
 
         if not man2.isJump:
@@ -386,8 +410,18 @@ while run:
         else:
             man2.standing = True
             man2.walkCount = 0
-        if keys[pygame.K_RETURN] or mouse[0] == 1:
+        if keys[pygame.K_RETURN]:
             man2.attacking = True
+        if mouse[0] == 1:
+            if man2.right and mouse_coord[0] < man2.rect.left:
+                man2.right = False
+                man2.left = True
+            elif man2.left and mouse_coord[0] > man2.rect.left:
+                man2.right = True
+                man2.left = False
+            print('left',man2.left,'right',man2.right,'/n')
+            man2.attacking = True
+
 
         if not man2.isJump:
             if keys[pygame.K_RSHIFT]:
