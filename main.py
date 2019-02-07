@@ -3,7 +3,7 @@ import os
 
 pygame.init()
 # pygame.key.set_repeat(200, 70)
-JOY = False
+JOY = True
 joystick = None
 if JOY:
     pygame.joystick.init()
@@ -151,6 +151,11 @@ class Player(pygame.sprite.Sprite):
         self.isJump = False
         self.jumpCountStart = 9
         self.jumpCount = 9
+        self.enemyLeft = False
+        self.enemyRight = False
+
+
+
     def load_images(self, name, path, type, count, whereL, whereR):
         for i in range(0, count):
             n = ''
@@ -167,6 +172,7 @@ class Player(pygame.sprite.Sprite):
             self.rect = img_temp.get_rect()
         self.is_loaded = True
         self.rect = self.rect.move(self.x, self.y)
+
         self.update()
 
     def update(self):
@@ -196,7 +202,7 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.image = self.LSFrames[self.attackCount // 1]
             self.attackCount += 2
-
+        self.mask = pygame.mask.from_surface(self.image)
 
 run = True
 idleLeft = load_image('0_Golem_Idle_000.png','images//PNG Sequences_golem1//Idle_//')
@@ -216,6 +222,23 @@ bg = load_image('1600x900_backg.jpg', 'images')
 win.blit(bg, (0, 0))
 while run:
     pygame.time.Clock().tick(FPS)
+    if pygame.sprite.collide_mask(man1,man2):
+        if man1.rect.left > man2.rect.left:
+            man1.enemyLeft = True
+            man1.enemyRight = False
+            man2.enemyRight = True
+            man2.enemyLeft = False
+        else:
+            man1.enemyLeft = False
+            man1.enemyRight = True
+            man2.enemyRight = False
+            man2.enemyLeft = True
+    else:
+        man1.enemyLeft = False
+        man1.enemyRight = False
+        man2.enemyRight = False
+        man2.enemyLeft = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -236,16 +259,16 @@ while run:
         BTN_Y = joystick.get_button(3)
         BTN_A = joystick.get_button(0)
         #hero 1
-        if hat[0] == -1:
+        if hat[0] == -1 and not man1.enemyLeft:
             man1.standing = False
             if man1.right is True:
                 man1.rect.left += man1.rect.width // 14
                 man1.right = False
                 man1.left = True
             man1.rect.left -= man1.speed
-        elif hat[0] == 1:
+        elif hat[0] == 1 and not man1.enemyRight:
             man1.standing = False
-            if man1.left is True:
+            if man1.left is True :
                 man1.rect.left -= man1.rect.width // 14
                 man1.right = True
                 man1.left = False
@@ -273,14 +296,14 @@ while run:
                 man1.jumpCount = man1.jumpCountStart
 
         #hero 2
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a] ) and not man2.enemyLeft:
             man2.standing = False
-            if man2.right is True:
+            if man2.right is True :
                 man2.rect.left += man2.rect.width // 14
                 man2.right = False
                 man2.left = True
             man2.rect.left -= man2.speed
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and not man2.enemyRight:
             man2.standing = False
             if man2.left is True:
                 man2.rect.left -= man2.rect.width // 14
