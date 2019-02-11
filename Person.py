@@ -18,15 +18,15 @@ def load_image(name, path, color_key=None):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y,idleImageLeft,idleImageRight,group):
+    def __init__(self, x, y,idleImageLeft,idleImageRight,idleImageLeftRed,idleImageRightRed,group):
         super().__init__(group)
         self.is_loaded = False
         # left(right) run
-        self.LRFrames = []
-        self.RRFrames = []
+        self.LeftRunFrames = []
+        self.RightRunFrames = []
         # left (right) attack
-        self.LSFrames = []
-        self.RSFrames = []
+        self.LeftSlashingFrames = []
+        self.RightSlashingFrames = []
         self.cur_frame = 0
         self.image = None
         self.rect = None
@@ -37,6 +37,7 @@ class Player(pygame.sprite.Sprite):
         self.right = True
         self.standing = True
         self.run = False
+        #2 счётчика для ходьбы и атаки.Нужны,чтобы перебирать кадрики
         self.walkCount = 0
         self.attackCount = 0
         self.attacking = False
@@ -48,9 +49,12 @@ class Player(pygame.sprite.Sprite):
         self.enemyLeft = False
         self.enemyRight = False
         self.enemyBottom = False
+        self.idleImageLeftRed = idleImageLeftRed
+        self.idleImageRightRed = idleImageRightRed
+        self.isReceivingDamage = False
+        self.isReceivingDamageFlag = False
 
-
-    def load_images(self, name, path, type, count, whereL, whereR):
+    def load_images(self, name, path, type, count, whereR, whereL):
         for i in range(0, count):
             n = ''
             if i <= 9:
@@ -60,39 +64,58 @@ class Player(pygame.sprite.Sprite):
             img_temp = load_image(name + n + type, path)
             size = img_temp.get_rect()
             img_temp = pygame.transform.scale(img_temp, (size.width, size.height))
-            whereL.append(img_temp)
+            whereR.append(img_temp)
             flipped_surface = pygame.transform.flip(img_temp, True, False)
-            whereR.append(flipped_surface)
+            whereL.append(flipped_surface)
             self.rect = img_temp.get_rect()
         self.is_loaded = True
         self.rect = self.rect.move(self.x, self.y)
         self.update()
 
     def update(self):
+        #обновление счётчика
         if self.walkCount + 1 >= 12 * 1:
             self.walkCount = 0
         if not self.standing:
             if self.left:
                 # win.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
-                self.image = self.LRFrames[self.walkCount // 1]
+                self.image = self.LeftRunFrames[self.walkCount // 1]
                 self.walkCount += 1
             elif self.right:
-                self.image = self.RRFrames[self.walkCount // 1]
+                self.image = self.RightRunFrames[self.walkCount // 1]
                 self.walkCount += 1
         else:
             if self.right:
-                self.image = self.idleImageLeft
-                size = self.image.get_rect()
-            else:
                 self.image = self.idleImageRight
                 size = self.image.get_rect()
+            else:
+                self.image = self.idleImageLeft
+                size = self.image.get_rect()
+        # обновление счётчика
         if self.attackCount + 1 >= 12 * 1:
             self.attackCount = 0
+            #если счётчик надо обнулить ,значит атака закончилась
             self.attacking = False
         if self.attacking:
             if self.right:
-                self.image = self.RSFrames[self.attackCount // 1]
+                self.image = self.RightSlashingFrames[self.attackCount // 1]
             else:
-                self.image = self.LSFrames[self.attackCount // 1]
+                self.image = self.LeftSlashingFrames[self.attackCount // 1]
+            #+=2 сделана ,чтобы анимация удара была побыстрее
             self.attackCount += 2
         self.mask = pygame.mask.from_surface(self.image)
+
+
+    def red_image_on(self):
+        self.isReceivingDamage = True
+        if self.right:
+            self.image = self.idleImageRightRed
+        else:
+            self.image = self.idleImageLeftRed
+
+    def red_image_off(self):
+        self.isReceivingDamage = False
+        if self.right:
+            self.image = self.idleImageRight
+        else:
+            self.image = self.idleImageLeft
