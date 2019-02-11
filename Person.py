@@ -52,7 +52,6 @@ class Player(pygame.sprite.Sprite):
         self.idleImageLeftRed = idleImageLeftRed
         self.idleImageRightRed = idleImageRightRed
         self.isReceivingDamage = False
-        self.isReceivingDamageFlag = False
 
     def load_images(self, name, path, type, count, whereR, whereL):
         for i in range(0, count):
@@ -76,7 +75,7 @@ class Player(pygame.sprite.Sprite):
         #обновление счётчика
         if self.walkCount + 1 >= 12 * 1:
             self.walkCount = 0
-        if not self.standing:
+        if not self.standing and not self.isReceivingDamage:
             if self.left:
                 # win.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
                 self.image = self.LeftRunFrames[self.walkCount // 1]
@@ -84,7 +83,7 @@ class Player(pygame.sprite.Sprite):
             elif self.right:
                 self.image = self.RightRunFrames[self.walkCount // 1]
                 self.walkCount += 1
-        else:
+        elif not self.isReceivingDamage:
             if self.right:
                 self.image = self.idleImageRight
                 size = self.image.get_rect()
@@ -96,7 +95,7 @@ class Player(pygame.sprite.Sprite):
             self.attackCount = 0
             #если счётчик надо обнулить ,значит атака закончилась
             self.attacking = False
-        if self.attacking:
+        if self.attacking and not self.isReceivingDamage:
             if self.right:
                 self.image = self.RightSlashingFrames[self.attackCount // 1]
             else:
@@ -107,14 +106,12 @@ class Player(pygame.sprite.Sprite):
 
 
     def red_image_on(self):
-        self.isReceivingDamage = True
         if self.right:
             self.image = self.idleImageRightRed
         else:
             self.image = self.idleImageLeftRed
 
     def red_image_off(self):
-        self.isReceivingDamage = False
         if self.right:
             self.image = self.idleImageRight
         else:

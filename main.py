@@ -17,7 +17,7 @@ JOY = False
 joystick = None
 #событие по таймеру.Нужно ,чтобы атакуемый перс(пока что id1) был 2 сек красным (сейчас ещё почему-то не работает)
 MYEVENTTYPE = 30
-pygame.time.set_timer(MYEVENTTYPE, 2000)
+pygame.time.set_timer(MYEVENTTYPE, 1000 * 3)
 #если геймпад подключен
 if JOY:
     pygame.joystick.init()
@@ -119,15 +119,16 @@ while run:
         #если второй атакует и первый ещё не атакуемый
         if man2.attacking:
             if not man1.isReceivingDamage:
-                man1.isReceivingDamageFlag = True
                 man1.red_image_on()
+                man1.isReceivingDamage = True
+
 
     else:
         man1.enemyLeft = False
         man1.enemyRight = False
         man2.enemyRight = False
         man2.enemyLeft = False
-        man1.isReceivingDamageFlag = False
+        man1.isReceivingDamage = False
 
     '''
     #if pygame.sprite.collide_mask(man1, obj):
@@ -145,8 +146,9 @@ while run:
             run = False
         #событие по таймеру для покраснения кадрика перса id1
         if event.type == MYEVENTTYPE:
-            if man1.isReceivingDamage and man1.isReceivingDamageFlag == False:
+            if not man1.isReceivingDamage:
                 man1.red_image_off()
+                print('сработал')
 
 
     mouse = pygame.mouse.get_pressed()
